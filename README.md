@@ -69,3 +69,55 @@ The platform is completely free, open-source, and ready for deployment to produc
 ```bash
 git clone https://github.com/yourusername/ai-governance-platform.git
 cd ai-governance-platform
+
+
+Security Considerations
+Environment Variables: Never commit .env file
+
+Database: Use strong passwords in production
+
+SSL: Always use valid SSL certificates
+
+API Keys: Rotate regularly
+
+Rate Limiting: Implement for production use
+
+Backups: Regular database backups
+
+Monitoring
+Health check endpoint: /health
+
+Metrics endpoint: /metrics (if enabled)
+
+Logs: Docker logs or centralized logging
+
+Troubleshooting
+Common Issues
+Database connection errors:
+
+Check if PostgreSQL is running: docker-compose ps
+
+Verify connection string in .env
+
+Port conflicts:
+
+Change ports in docker-compose.yml
+
+Check running services: netstat -tulpn
+
+Permission denied for uploads:
+
+bash
+chmod 777 backend/uploads
+Contributing
+Fork the repository
+
+Create feature branch
+
+Commit changes
+
+Push to branch
+
+Create Pull Request
+
+
