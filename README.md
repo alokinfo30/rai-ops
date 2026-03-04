@@ -61,3 +61,29 @@ responsible-ai-platform/
 ├── .env.example                         # Environment variables template
 ├── .gitignore                           # Git ignore (similar to previous)
 └── deploy.sh                             # Deployment script
+
+
+
+🧪 Testing the Platform
+Start Ollama: ollama serve
+
+Run Flask: python app.py
+
+Open browser to http://localhost:5000
+
+Use Red Teaming to generate and run attacks
+
+Monitoring will log interactions if you set up the middleware (you can simulate by posting to /api/monitoring/log)
+
+Knowledge Transfer: start an interview, then ask the virtual apprentice
+
+✅ Summary
+This complete platform provides:
+
+Red Teaming as a Service: Generate adversarial prompts and simulate attacks using local LLMs.
+
+Continuous Control Monitoring: Log AI interactions, detect PII/toxicity/bias, enforce policies.
+
+Institutional Knowledge Transfer: Interview experts, build knowledge graph, and query via virtual apprentice.
+
+All components are free, open-source, and responsive across devices. The code is modular and can be extended with more sophisticated detectors or integrations.
