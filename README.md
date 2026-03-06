@@ -116,6 +116,26 @@ Create feature branch
 
 Commit changes
 
+Roadmap
+Add more AI attack simulations
+
+Implement real-time monitoring dashboard
+
+Add support for more ML frameworks
+
+Create mobile app
+
+Add compliance reporting
+
+Implement advanced analytics
+
+Acknowledgments
+OpenAI for API access
+
+Flask community
+
+Docker community
+
 Push to branch
 
 Create Pull Request
