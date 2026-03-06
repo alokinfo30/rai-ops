@@ -1,28 +1,33 @@
 import os
+import sys
 from datetime import timedelta
 from dotenv import load_dotenv
 
-# Load .env from parent directory
+# Load .env from parent directory if it exists
 basedir = os.path.abspath(os.path.dirname(__file__))
-load_dotenv(os.path.join(basedir, '..', '.env'))
-
-# Prioritize DATABASE_URL from environment (for Render, Heroku, etc.)
-# Fallback to constructing it for local/docker-compose development
-if 'DATABASE_URL' in os.environ:
-    DATABASE_URL = os.environ['DATABASE_URL']
-    # Render's postgres URLs might start with postgres://, but SQLAlchemy needs postgresql://
-    if DATABASE_URL.startswith("postgres://"):
-        DATABASE_URL = DATABASE_URL.replace("postgres://", "postgresql://", 1)
-else:
-    DB_USER = os.getenv('POSTGRES_USER', 'user')
-    DB_PASSWORD = os.getenv('POSTGRES_PASSWORD', 'password')
-    DB_HOST = os.getenv('DATABASE_HOST', 'localhost')
-    DB_NAME = os.getenv('POSTGRES_DB', 'aigovernance')
-    DATABASE_URL = f"postgresql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:5432/{DB_NAME}"
+env_path = os.path.join(basedir, '..', '.env')
+if os.path.exists(env_path):
+    load_dotenv(env_path)
 
 class Config:
     # Database
-    SQLALCHEMY_DATABASE_URI = DATABASE_URL
+    # Prioritize DATABASE_URL from environment (Render/Production)
+    uri = os.environ.get('DATABASE_URL')
+    
+    if uri:
+        print("Config: Using DATABASE_URL from environment.", file=sys.stderr)
+        if uri.startswith("postgres://"):
+            uri = uri.replace("postgres://", "postgresql://", 1)
+        SQLALCHEMY_DATABASE_URI = uri
+    else:
+        print("Config: DATABASE_URL not found. Using local fallback.", file=sys.stderr)
+        db_user = os.environ.get('POSTGRES_USER', 'user')
+        db_password = os.environ.get('POSTGRES_PASSWORD', 'password')
+        db_host = os.environ.get('DATABASE_HOST', 'localhost')
+        db_name = os.environ.get('POSTGRES_DB', 'aigovernance')
+        SQLALCHEMY_DATABASE_URI = f"postgresql://{db_user}:{db_password}@{db_host}:5432/{db_name}"
+
+    SQLALCHEMY_DATABASE_URI = SQLALCHEMY_DATABASE_URI
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     
     # Security

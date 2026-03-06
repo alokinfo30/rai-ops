@@ -1,42 +1,52 @@
 from flask import Flask, request, jsonify, send_from_directory
 from flask_cors import CORS
 from flask_jwt_extended import JWTManager, create_access_token, jwt_required, get_jwt_identity
-from datetime import datetime
+from datetime import datetime, timedelta
 import os
 import random
 from models import db, User, AITest, ComplianceLog, ModelDrift, Alert, ExpertSession
 from config import Config
 
-# Determine static folder path (robust for different execution contexts)
-basedir = os.path.abspath(os.path.dirname(__file__))
-static_folder = os.path.join(basedir, '../frontend')
+def create_app(config_class=Config):
+    # Determine static folder path (robust for different execution contexts)
+    basedir = os.path.abspath(os.path.dirname(__file__))
+    static_folder = os.path.join(basedir, '../frontend')
 
-# Initialize Flask app
-app = Flask(__name__, static_folder=static_folder, static_url_path='')
-app.config.from_object(Config)
+    app = Flask(__name__, static_folder=static_folder, static_url_path='')
+    app.config.from_object(config_class)
 
-# Initialize extensions
-CORS(app)
-jwt = JWTManager(app)
-db.init_app(app)
+    # Initialize extensions
+    CORS(app)
+    JWTManager(app)
+    db.init_app(app)
 
-# Create tables
-with app.app_context():
-    db.create_all()
+    # Register Blueprints / Routes
+    register_routes(app)
 
-# Health Check Endpoint
-@app.route('/health')
-def health_check():
-    return jsonify({'status': 'healthy', 'timestamp': datetime.utcnow().isoformat()}), 200
+    # Register CLI commands
+    @app.cli.command("init-db")
+    def init_db_command():
+        """Creates the database tables."""
+        with app.app_context():
+            db.create_all()
+        print("Initialized the database.")
 
-# Serve frontend
-@app.route('/')
-def serve_index():
-    return send_from_directory(app.static_folder, 'index.html')
+    return app
 
-@app.route('/<path:path>')
-def serve_static(path):
-    return send_from_directory(app.static_folder, path)
+def register_routes(app):
+    # Health Check Endpoint
+    @app.route('/health')
+    def health_check():
+        return jsonify({'status': 'healthy', 'timestamp': datetime.utcnow().isoformat()}), 200
+
+    # Serve frontend
+    @app.route('/', defaults={'path': ''})
+    @app.route('/<path:path>')
+    def serve(path):
+        if path != "" and os.path.exists(os.path.join(app.static_folder, path)):
+            return send_from_directory(app.static_folder, path)
+        else:
+            return send_from_directory(app.static_folder, 'index.html')
 
 # Authentication routes
 @app.route('/api/auth/register', methods=['POST'])
@@ -342,6 +352,3 @@ def get_virtual_apprentice(session_id):
         'source_graph': session.knowledge_graph
     }
     return jsonify(apprentice)
-
-if __name__ == '__main__':
-    app.run(debug=True, host='0.0.0.0', port=5000)
