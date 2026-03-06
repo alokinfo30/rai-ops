@@ -1,0 +1,22 @@
+services:
+  - type: web
+    name: ai-governance-backend
+    runtime: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn app:app
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: ai-governance-db
+          property: connectionString
+      - key: SECRET_KEY
+        generateValue: true
+      - key: JWT_SECRET_KEY
+        generateValue: true
+      - key: FLASK_DEBUG
+        value: false
+
+databases:
+  - name: ai-governance-db
+    databaseName: aigovernance
+    user: postgres
