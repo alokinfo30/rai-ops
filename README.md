@@ -141,3 +141,61 @@ Push to branch
 Create Pull Request
 
 
+Activating the Virtual Environment
+The source command is for Linux/Git Bash. In a Windows Command Prompt, you call the script directly.
+
+The Fix:
+
+DOS
+venv\Scripts\activate
+Once activated, your prompt should start with (venv).
+
+Generating Secret Keys (Python Syntax)
+When you are inside the Python interpreter (the >>> prompt), you have to run commands one line at a time. You don't type the word "python" again.
+
+The Fix:
+
+Type python to enter the shell.
+
+Run these three separate lines:
+
+Python
+import secrets
+print(secrets.token_hex(32))
+exit()
+Copy that long string for your .env file
+
+Build and run with Docker:
+
+bash
+docker-compose up --build
+Access the application:
+
+Web UI: http://localhost
+
+API: http://localhost/api
+
+Health check: http://localhost/health
+
+Local Development
+Set up Python virtual environment:
+
+bash
+python -m venv venv
+source venv/bin/activate  # On Windows: venv\Scripts\activate
+pip install -r backend/requirements.txt
+Set up database:
+
+bash
+docker-compose up postgres redis
+Run backend:
+
+bash
+cd backend
+python app.py
+Serve frontend:
+
+bash
+# Using Python HTTP server
+cd frontend
+python -m http.server 8000
