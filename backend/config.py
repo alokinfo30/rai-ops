@@ -6,12 +6,19 @@ from dotenv import load_dotenv
 basedir = os.path.abspath(os.path.dirname(__file__))
 load_dotenv(os.path.join(basedir, '..', '.env'))
 
-DB_USER = os.getenv('POSTGRES_USER', 'user')
-DB_PASSWORD = os.getenv('POSTGRES_PASSWORD', 'password')
-DB_HOST = os.getenv('DATABASE_HOST', 'localhost')
-DB_NAME = os.getenv('POSTGRES_DB', 'aigovernance')
-
-DATABASE_URL = f"postgresql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:5432/{DB_NAME}"
+# Prioritize DATABASE_URL from environment (for Render, Heroku, etc.)
+# Fallback to constructing it for local/docker-compose development
+if 'DATABASE_URL' in os.environ:
+    DATABASE_URL = os.environ['DATABASE_URL']
+    # Render's postgres URLs might start with postgres://, but SQLAlchemy needs postgresql://
+    if DATABASE_URL.startswith("postgres://"):
+        DATABASE_URL = DATABASE_URL.replace("postgres://", "postgresql://", 1)
+else:
+    DB_USER = os.getenv('POSTGRES_USER', 'user')
+    DB_PASSWORD = os.getenv('POSTGRES_PASSWORD', 'password')
+    DB_HOST = os.getenv('DATABASE_HOST', 'localhost')
+    DB_NAME = os.getenv('POSTGRES_DB', 'aigovernance')
+    DATABASE_URL = f"postgresql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:5432/{DB_NAME}"
 
 class Config:
     # Database
