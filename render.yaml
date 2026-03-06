@@ -2,6 +2,7 @@ services:
   - type: web
     name: ai-governance-backend
     runtime: python
+    rootDir: backend
     buildCommand: pip install -r requirements.txt
     startCommand: gunicorn app:app
     envVars:
