@@ -20,4 +20,4 @@ services:
 databases:
   - name: ai-governance-db
     databaseName: aigovernance
-    user: postgres
+    user: alok1507
