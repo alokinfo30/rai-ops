@@ -257,3 +257,14 @@ input, select {
     text-align: center;
     padding: 1rem;
 }
+
+/* Footer */
+.page-footer {
+    text-align: center;
+    padding: 1.5rem;
+    margin-top: 2rem;
+    background-color: var(--card-bg);
+    border-top: 1px solid var(--border-color);
+    color: var(--text-light);
+    font-size: 0.9rem;
+}

@@ -9,13 +9,16 @@ if (authToken === 'null' || authToken === 'undefined') {
 }
 
 // API Configuration
-const API_URL = '/api';
+const API_URL = window.location.hostname === 'localhost'
+    ? '/api' // Use relative path for local dev (proxied by Nginx)
+    : 'https://rai-ops.onrender.com/api'; // Use absolute path for production
 
 // Initialize the application
 document.addEventListener('DOMContentLoaded', () => {
     initEventListeners();
     checkAuth();
     loadPage('dashboard');
+    setCopyright();
 });
 
 function initEventListeners() {
@@ -726,6 +729,13 @@ function closeAllModals() {
     document.querySelectorAll('.modal').forEach(modal => {
         modal.style.display = 'none';
     });
+}
+
+function setCopyright() {
+    const yearSpan = document.getElementById('copyright-year');
+    if (yearSpan) {
+        yearSpan.textContent = new Date().getFullYear();
+    }
 }
 
 // Make functions available globally
