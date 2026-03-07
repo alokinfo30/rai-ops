@@ -3,46 +3,82 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI Governance Platform</title>
-    <style>
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
-            line-height: 1.6;
-            color: #333;
-            max-width: 800px;
-            margin: 0 auto;
-            padding: 2rem;
-            background-color: #f4f6f8;
-        }
-        .container {
-            background: white;
-            padding: 2rem;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-            text-align: center;
-        }
-        h1 { color: #2c3e50; }
-        .status {
-            display: inline-block;
-            padding: 0.5rem 1rem;
-            background: #e8f5e9;
-            color: #2e7d32;
-            border-radius: 4px;
-            margin-top: 1rem;
-        }
-        code {
-            background: #eee;
-            padding: 0.2rem 0.4rem;
-            border-radius: 3px;
-        }
-    </style>
+    <title>RAI Ops - AI Governance & Security</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 </head>
 <body>
-    <div class="container">
-        <h1>AI Governance Platform</h1>
-        <p>The system is running successfully.</p>
-        <div class="status">System Status: <strong>Operational</strong></div>
-        <p style="margin-top: 2rem;">API Endpoint: <code>/api/health</code></p>
+    <header>
+        <nav class="navbar">
+            <div class="nav-logo">
+                <a href="#">RAI Ops</a>
+            </div>
+            <div class="nav-menu" id="navMenu">
+                <a href="#" class="nav-link active" data-page="dashboard">Dashboard</a>
+                <a href="#" class="nav-link" data-page="redteaming">Red Teaming</a>
+                <a href="#" class="nav-link" data-page="monitoring">Monitoring</a>
+                <a href="#" class="nav-link" data-page="knowledge">Knowledge</a>
+            </div>
+            <div class="nav-user" id="navUser">
+                <button class="btn-login" id="loginBtn">Login</button>
+                <button class="btn-signup" id="signupBtn">Sign Up</button>
+            </div>
+            <div class="mobile-menu-btn" id="mobileMenuBtn">
+                <i class="fas fa-bars"></i>
+            </div>
+        </nav>
+    </header>
+
+    <main id="mainContent">
+        <!-- Dynamic content will be loaded here -->
+    </main>
+
+    <!-- Login Modal -->
+    <div id="loginModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2>Login</h2>
+            <form id="loginForm">
+                <div class="form-group">
+                    <label for="username">Username</label>
+                    <input type="text" id="username" required>
+                </div>
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <input type="password" id="password" required>
+                </div>
+                <button type="submit" class="btn-primary">Login</button>
+            </form>
+        </div>
     </div>
+
+    <!-- Signup Modal -->
+    <div id="signupModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2>Sign Up</h2>
+            <form id="signupForm">
+                <div class="form-group">
+                    <label for="signupUsername">Username</label>
+                    <input type="text" id="signupUsername" required>
+                </div>
+                <div class="form-group">
+                    <label for="signupEmail">Email</label>
+                    <input type="email" id="signupEmail" required>
+                </div>
+                 <div class="form-group">
+                    <label for="signupCompany">Company</label>
+                    <input type="text" id="signupCompany">
+                </div>
+                <div class="form-group">
+                    <label for="signupPassword">Password</label>
+                    <input type="password" id="signupPassword" required>
+                </div>
+                <button type="submit" class="btn-primary">Sign Up</button>
+            </form>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
 </body>
 </html>

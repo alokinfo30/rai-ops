@@ -2,11 +2,14 @@
 let currentUser = null;
 let currentPage = 'dashboard';
 let authToken = localStorage.getItem('token');
+// Sanitize token if it got corrupted
+if (authToken === 'null' || authToken === 'undefined') {
+    authToken = null;
+    localStorage.removeItem('token');
+}
 
 // API Configuration
-const API_URL = window.location.hostname === 'localhost' 
-    ? 'http://localhost:5000/api'
-    : 'https://rai-ops.onrender.com/api';
+const API_URL = '/api';
 
 // Initialize the application
 document.addEventListener('DOMContentLoaded', () => {
@@ -480,81 +483,115 @@ async function loadRecentTests() {
 }
 
 async function loadMonitoringData() {
+    if (!authToken || authToken === "null" || isTokenExpired(authToken)) {
+        console.warn("Auth token missing or expired. Redirecting to login.");
+        logout();
+        return;
+    }
+
     try {
-        // Load drift data
-        const driftResponse = await fetch(`${API_URL}/monitoring/drift`, {
-            headers: {
-                'Authorization': `Bearer ${authToken}`
-            }
-        });
-        
-        const driftData = await driftResponse.json();
-        
-        // Display drift chart (simplified)
-        const driftHtml = driftData.map(drift => `
-            <div class="alert-item">
-                <div class="alert-severity ${drift.drift_score > 0.15 ? 'high' : 'medium'}">
-                    <i class="fas fa-chart-line"></i>
-                </div>
-                <div>
-                    <strong>${drift.model_name}</strong>
-                    <br>
-                    <small>${drift.metric_name}: ${(drift.drift_score * 100).toFixed(1)}% drift</small>
-                </div>
-            </div>
-        `).join('');
-        
-        document.getElementById('driftChart').innerHTML = driftHtml || '<p>No drift detected</p>';
-        
-        // Load alerts
+        // 1. Fetch alerts first to validate token quickly
         const alertsResponse = await fetch(`${API_URL}/monitoring/alerts`, {
-            headers: {
-                'Authorization': `Bearer ${authToken}`
+            headers: { 
+                'Authorization': `Bearer ${authToken}`,
+                'Accept': 'application/json'
             }
         });
-        
+
+        if (alertsResponse.status === 401 || alertsResponse.status === 422) {
+            console.warn("Session expired or invalid. Logging out.");
+            logout();
+            return;
+        }
+
+        if (!alertsResponse.ok) {
+            throw new Error(`Failed to fetch alerts: ${alertsResponse.status}`);
+        }
+
         const alerts = await alertsResponse.json();
-        
-        const alertsHtml = alerts.map(alert => `
-            <div class="alert-item">
-                <div class="alert-severity ${alert.severity}">
-                    <i class="fas fa-exclamation"></i>
-                </div>
-                <div>
-                    <strong>${alert.message}</strong>
-                    <br>
-                    <small>${new Date(alert.timestamp).toLocaleString()}</small>
-                </div>
-            </div>
-        `).join('');
-        
-        document.getElementById('alerts').innerHTML = alertsHtml;
-        
-        // Load compliance logs
-        const logsResponse = await fetch(`${API_URL}/monitoring/compliance-logs`, {
-            headers: {
-                'Authorization': `Bearer ${authToken}`
+
+        // 2. Fetch remaining data in parallel
+        const endpoints = ['/monitoring/drift', '/monitoring/compliance-logs'];
+        const requests = endpoints.map(endpoint => 
+            fetch(`${API_URL}${endpoint}`, {
+                headers: { 'Authorization': `Bearer ${authToken}` }
+            })
+        );
+
+        const responses = await Promise.all(requests);
+
+        for (const res of responses) {
+            if (!res.ok) {
+                // Throw an error that includes the status to be more specific
+                throw new Error(`Failed to fetch data: ${res.status} ${res.statusText}`);
             }
-        });
-        
-        const logs = await logsResponse.json();
-        
-        const logsHtml = logs.map(log => `
-            <div class="alert-item">
-                <div class="alert-severity low">
-                    <i class="fas fa-clipboard-list"></i>
+        }
+
+        const [driftData, logs] = await Promise.all(responses.map(res => res.json()));
+
+        // Render Drift Data
+        const driftContainer = document.getElementById('driftChart');
+        if (Array.isArray(driftData) && driftData.length > 0) {
+            driftContainer.innerHTML = driftData.map(drift => `
+                <div class="alert-item">
+                    <div class="alert-severity ${drift.drift_score > 0.15 ? 'high' : 'medium'}">
+                        <i class="fas fa-chart-line"></i>
+                    </div>
+                    <div>
+                        <strong>${drift.model_name}</strong>
+                        <br>
+                        <small>${drift.metric_name}: ${(drift.drift_score * 100).toFixed(1)}% drift</small>
+                    </div>
                 </div>
-                <div>
-                    <strong>${log.action}</strong> on ${log.resource}
-                    <br>
-                    <small>${new Date(log.timestamp).toLocaleString()}</small>
+            `).join('');
+        } else {
+            driftContainer.innerHTML = '<p>No drift data to display.</p>';
+        }
+
+        // Render Alerts
+        const alertsContainer = document.getElementById('alerts');
+        if (Array.isArray(alerts) && alerts.length > 0) {
+            alertsContainer.innerHTML = alerts.map(alert => `
+                <div class="alert-item">
+                    <div class="alert-severity ${alert.severity}">
+                        <i class="fas fa-exclamation"></i>
+                    </div>
+                    <div>
+                        <strong>${alert.message}</strong>
+                        <br>
+                        <small>${new Date(alert.timestamp).toLocaleString()}</small>
+                    </div>
                 </div>
-            </div>
-        `).join('');
-        
-        document.getElementById('complianceLogs').innerHTML = logsHtml;
+            `).join('');
+        } else {
+            alertsContainer.innerHTML = '<p>No active alerts.</p>';
+        }
+
+        // Render Compliance Logs
+        const logsContainer = document.getElementById('complianceLogs');
+        if (Array.isArray(logs) && logs.length > 0) {
+            logsContainer.innerHTML = logs.map(log => `
+                <div class="alert-item">
+                    <div class="alert-severity low">
+                        <i class="fas fa-clipboard-list"></i>
+                    </div>
+                    <div>
+                        <strong>${log.action}</strong> on ${log.resource}
+                        <br>
+                        <small>${new Date(log.timestamp).toLocaleString()}</small>
+                    </div>
+                </div>
+            `).join('');
+        } else {
+            logsContainer.innerHTML = '<p>No compliance logs to display.</p>';
+        }
+
     } catch (error) {
         console.error('Error loading monitoring data:', error);
+        // Display a more user-friendly error within each component on failure
+        document.getElementById('driftChart').innerHTML = `<p class="error">Could not load drift data.</p>`;
+        document.getElementById('alerts').innerHTML = `<p class="error">Could not load alerts.</p>`;
+        document.getElementById('complianceLogs').innerHTML = `<p class="error">Could not load logs.</p>`;
     }
 }
 
@@ -623,6 +660,10 @@ async function displayVirtualApprentice(sessionId) {
 // UI Functions
 function checkAuth() {
     if (authToken) {
+        if (isTokenExpired(authToken)) {
+            logout();
+            return;
+        }
         const userStr = localStorage.getItem('user');
         if (userStr) {
             currentUser = JSON.parse(userStr);
@@ -658,6 +699,22 @@ function logout() {
     localStorage.removeItem('user');
     updateUIForAuth();
     loadPage('dashboard');
+}
+
+function isTokenExpired(token) {
+    if (!token) return true;
+    try {
+        // Decode the JWT payload (Base64Url -> Base64 -> JSON)
+        const base64 = token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/');
+        const payload = JSON.parse(atob(base64));
+        // Check if current time is past expiration (exp is in seconds)
+        if (payload.exp && Date.now() >= payload.exp * 1000) {
+            return true;
+        }
+        return false;
+    } catch (e) {
+        return true;
+    }
 }
 
 function openModal(modalId) {
