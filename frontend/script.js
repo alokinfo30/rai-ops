@@ -6,7 +6,7 @@ let authToken = localStorage.getItem('token');
 // API Configuration
 const API_URL = window.location.hostname === 'localhost' 
     ? 'http://localhost:5000/api'
-    : '/api';
+    : 'https://rai-ops.onrender.com/api';
 
 // Initialize the application
 document.addEventListener('DOMContentLoaded', () => {
