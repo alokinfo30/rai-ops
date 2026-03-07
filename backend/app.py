@@ -4,6 +4,7 @@ from flask_cors import CORS
 from flask_jwt_extended import JWTManager, create_access_token, jwt_required, get_jwt_identity
 from datetime import datetime, timedelta
 import os
+import sys
 import random
 from models import db, User, AITest, ComplianceLog, ModelDrift, Alert, ExpertSession
 from config import Config
@@ -13,7 +14,10 @@ def create_app(config_class=Config):
     basedir = os.path.abspath(os.path.dirname(__file__))
     static_folder = os.path.join(basedir, '../frontend')
 
-    app = Flask(__name__, static_folder=static_folder, static_url_path='')
+    if not os.path.exists(static_folder):
+        print(f"WARNING: Static folder not found at {static_folder}. Frontend may not be served correctly.", file=sys.stderr)
+
+    app = Flask(__name__, static_folder=static_folder)
     app.config.from_object(config_class)
 
     # Initialize extensions
