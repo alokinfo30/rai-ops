@@ -90,6 +90,47 @@ def register_routes(app):
         
         return jsonify({'error': 'Invalid credentials'}), 401
 
+    # Dashboard routes
+    @app.route('/api/dashboard/stats', methods=['GET'])
+    @jwt_required()
+    def get_dashboard_stats():
+        try:
+            security_tests_count = db.session.query(AITest).count()
+            active_alerts_count = db.session.query(Alert).filter_by(resolved=False).count()
+            models_monitored_count = db.session.query(ModelDrift.model_name).distinct().count()
+            
+            # Compliance score is complex, simulate for now as a percentage
+            compliance_score = 85
+            
+            return jsonify({
+                'securityTests': security_tests_count,
+                'activeAlerts': active_alerts_count,
+                'modelsMonitored': models_monitored_count,
+                'complianceScore': compliance_score
+            })
+        except Exception as e:
+            print(f"Error fetching dashboard stats: {e}", file=sys.stderr)
+            return jsonify({'error': 'Could not fetch dashboard statistics'}), 500
+
+    @app.route('/api/dashboard/recent-activity', methods=['GET'])
+    @jwt_required()
+    def get_recent_activity():
+        try:
+            # The view is already ordered by date, limit to 10 for the dashboard
+            result = db.session.execute(db.text("SELECT * FROM recent_activity LIMIT 10"))
+            activities = [dict(row._mapping) for row in result]
+            
+            # Serialize datetime objects
+            for activity in activities:
+                if 'created_at' in activity and activity['created_at']:
+                    activity['created_at'] = activity['created_at'].isoformat()
+
+            return jsonify(activities)
+        except Exception as e:
+            print(f"Error fetching recent activity: {e}", file=sys.stderr)
+            # Handle case where view doesn't exist or other DB errors
+            return jsonify({'error': 'Could not fetch recent activity'}), 500
+
     # Red Teaming routes
     @app.route('/api/redteam/test', methods=['POST'])
     @jwt_required()
@@ -143,6 +184,14 @@ def register_routes(app):
         db.session.commit()
         
         return jsonify({'message': 'Test completed', 'results': results})
+
+    @app.route('/api/redteam/tests', methods=['GET'])
+    @jwt_required()
+    def get_recent_redteam_tests():
+        user_id = get_jwt_identity()
+        # Return the 10 most recent tests for the current user
+        tests = AITest.query.filter_by(user_id=user_id).order_by(AITest.created_at.desc()).limit(10).all()
+        return jsonify([test.to_dict() for test in tests])
 
     def simulate_redteam_attack(test_type):
         """Simulate different types of AI red teaming attacks"""

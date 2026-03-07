@@ -431,58 +431,80 @@ async function handleExpertSession(e) {
 
 async function updateDashboardStats() {
     try {
-        // Update stats with simulated data
-        document.getElementById('securityTests').textContent = Math.floor(Math.random() * 50) + 10;
-        document.getElementById('activeAlerts').textContent = Math.floor(Math.random() * 8);
-        document.getElementById('complianceScore').textContent = Math.floor(Math.random() * 30) + 70 + '%';
-        document.getElementById('modelsMonitored').textContent = Math.floor(Math.random() * 15) + 5;
-        
-        // Update recent activity
-        const activities = [
-            'Security test completed - Deepfake Detection',
-            'Model drift detected in Fraud Detection',
-            'New compliance log entry added',
-            'Expert session recorded - John Doe',
-            'Alert resolved: Data quality warning'
-        ];
-        
-        const activityHtml = activities.map(activity => 
-            `<div class="alert-item">
+        const [statsResponse, activityResponse] = await Promise.all([
+            fetch(`${API_URL}/dashboard/stats`, { headers: { 'Authorization': `Bearer ${authToken}` } }),
+            fetch(`${API_URL}/dashboard/recent-activity`, { headers: { 'Authorization': `Bearer ${authToken}` } })
+        ]);
+
+        if (!statsResponse.ok || !activityResponse.ok) {
+            if ([401, 422].includes(statsResponse.status) || [401, 422].includes(activityResponse.status)) {
+                logout();
+            }
+            throw new Error('Failed to fetch dashboard data');
+        }
+
+        const stats = await statsResponse.json();
+        const activities = await activityResponse.json();
+
+        document.getElementById('securityTests').textContent = stats.securityTests;
+        document.getElementById('activeAlerts').textContent = stats.activeAlerts;
+        document.getElementById('complianceScore').textContent = stats.complianceScore + '%';
+        document.getElementById('modelsMonitored').textContent = stats.modelsMonitored;
+
+        const activityHtml = activities.map(activity => {
+            const icon = activity.activity_type === 'test' ? 'fa-vial' : 'fa-clipboard-check';
+            return `
+            <div class="alert-item">
                 <div class="alert-severity low">
-                    <i class="fas fa-info"></i>
+                    <i class="fas ${icon}"></i>
                 </div>
-                <div>${activity}</div>
-            </div>`
-        ).join('');
-        
-        document.getElementById('recentActivity').innerHTML = activityHtml;
+                <div>
+                    <strong>${activity.activity_type === 'test' ? 'Test' : 'Compliance'}:</strong> ${activity.description}
+                    <br>
+                    <small>Status: ${activity.status} - ${new Date(activity.created_at).toLocaleString()}</small>
+                </div>
+            </div>`;
+        }).join('');
+
+        document.getElementById('recentActivity').innerHTML = activityHtml || '<p>No recent activity.</p>';
+
     } catch (error) {
         console.error('Error updating dashboard:', error);
+        document.getElementById('recentActivity').innerHTML = '<p class="error">Could not load recent activity.</p>';
     }
 }
 
 async function loadRecentTests() {
-    // Simulate loading recent tests
-    const tests = [
-        { name: 'Deepfake Detection', status: 'completed', date: new Date().toLocaleDateString() },
-        { name: 'Adversarial Attack Test', status: 'completed', date: new Date().toLocaleDateString() },
-        { name: 'Synthetic Identity Test', status: 'running', date: new Date().toLocaleDateString() }
-    ];
-    
-    const testsHtml = tests.map(test => `
-        <div class="alert-item">
-            <div class="alert-severity ${test.status === 'completed' ? 'low' : 'medium'}">
-                <i class="fas ${test.status === 'completed' ? 'fa-check' : 'fa-spinner'}"></i>
+    try {
+        const response = await fetch(`${API_URL}/redteam/tests`, {
+            headers: { 'Authorization': `Bearer ${authToken}` }
+        });
+
+        if (!response.ok) {
+            if ([401, 422].includes(response.status)) logout();
+            throw new Error('Failed to load recent tests');
+        }
+
+        const tests = await response.json();
+
+        const testsHtml = tests.map(test => `
+            <div class="alert-item">
+                <div class="alert-severity ${test.status === 'completed' ? 'low' : 'medium'}">
+                    <i class="fas ${test.status === 'completed' ? 'fa-check' : 'fa-spinner fa-spin'}"></i>
+                </div>
+                <div>
+                    <strong>${test.test_name}</strong> (${test.test_type})
+                    <br>
+                    <small>${test.status} - ${new Date(test.created_at).toLocaleString()}</small>
+                </div>
             </div>
-            <div>
-                <strong>${test.name}</strong>
-                <br>
-                <small>${test.status} - ${test.date}</small>
-            </div>
-        </div>
-    `).join('');
-    
-    document.getElementById('recentTests').innerHTML = testsHtml || '<p>No tests run yet</p>';
+        `).join('');
+
+        document.getElementById('recentTests').innerHTML = testsHtml || '<p>No tests run yet.</p>';
+    } catch (error) {
+        console.error('Error loading recent tests:', error);
+        document.getElementById('recentTests').innerHTML = '<p class="error">Could not load recent tests.</p>';
+    }
 }
 
 async function loadMonitoringData() {
