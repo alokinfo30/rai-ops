@@ -1,6 +1,7 @@
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
 from werkzeug.security import generate_password_hash, check_password_hash
+from sqlalchemy import Enum
 
 db = SQLAlchemy()
 
@@ -57,6 +58,31 @@ class AITest(db.Model):
             'completed_at': self.completed_at.isoformat() if self.completed_at else None
         }
 
+class ScheduleInterval(Enum):
+    DAILY = 'daily'
+    WEEKLY = 'weekly'
+    MONTHLY = 'monthly'
+
+class ScheduledTest(db.Model):
+    __tablename__ = 'scheduled_tests' 
+
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    test_name = db.Column(db.String(120), nullable=False)
+    test_type = db.Column(db.String(50), nullable=False)
+    target_system = db.Column(db.String(120), nullable=False)
+    schedule_interval = db.Column(Enum(ScheduleInterval), nullable=False)
+    start_date = db.Column(db.DateTime, nullable=False)
+    is_active = db.Column(db.Boolean, default=True)
+
+    def to_dict(self):
+        return {
+            'id': self.id, 'user_id': self.user_id, 'test_name': self.test_name,
+            'test_type': self.test_type, 'target_system': self.target_system,
+            'schedule_interval': self.schedule_interval.value, 'start_date': self.start_date.isoformat(),
+            'is_active': self.is_active
+        }
+
 class ComplianceLog(db.Model):
     __tablename__ = 'compliance_logs'
     
@@ -74,6 +100,8 @@ class ComplianceLog(db.Model):
             'id': self.id,
             'user_id': self.user_id,
             'action': self.action,
+
+
             'resource': self.resource,
             'status': self.status,
             'details': self.details,
@@ -81,6 +109,21 @@ class ComplianceLog(db.Model):
             'timestamp': self.timestamp.isoformat(),
         }
 
+class Notification(db.Model):
+    __tablename__ = 'notifications'
+
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    message = db.Column(db.String(500), nullable=False)
+    timestamp = db.Column(db.DateTime, default=datetime.utcnow)
+    is_read = db.Column(db.Boolean, default=False)
+
+    def to_dict(self):
+        return {
+            'id': self.id, 'user_id': self.user_id,
+            'message': self.message, 'timestamp': self.timestamp.isoformat(),
+            'is_read': self.is_read
+        }
 class ModelDrift(db.Model):
     __tablename__ = 'model_drift'
     

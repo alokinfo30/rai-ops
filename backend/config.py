@@ -34,6 +34,9 @@ class Config:
     SECRET_KEY = os.getenv('SECRET_KEY', 'dev-secret-key-change-in-production')
     JWT_SECRET_KEY = os.getenv('JWT_SECRET_KEY', 'jwt-secret-key-change-in-production')
     JWT_ACCESS_TOKEN_EXPIRES = timedelta(hours=1)
+    
+    # Rate Limiting
+    RATELIMIT_STORAGE_URI = os.getenv('REDIS_URL', 'memory://')
     REDIS_URL = os.getenv('REDIS_URL', 'redis://localhost:6379')
     
     # OpenAI

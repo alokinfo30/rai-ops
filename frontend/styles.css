@@ -68,6 +68,12 @@ body {
     flex-wrap: wrap;
 }
 
+.nav-user {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
 .nav-link {
     display: flex;
     align-items: center;
@@ -154,6 +160,22 @@ body {
     transform: translateY(-2px);
 }
 
+.btn-logout {
+    background: none;
+    border: 2px solid var(--danger-color);
+    color: var(--danger-color);
+    padding: 0.6rem 1.2rem;
+    border-radius: 50px;
+    font-size: 0.9rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.btn-logout:hover {
+    background: var(--danger-color);
+    color: white;
+}
 /* Main Content */
 .main-content {
     min-height: calc(100vh - 200px);
@@ -310,6 +332,10 @@ body {
     background: var(--success-color);
 }
 
+.alert-severity.critical {
+    background: #991b1b;
+}
+
 /* Knowledge Transfer */
 .knowledge-container {
     display: grid;
@@ -329,6 +355,11 @@ body {
     color: white;
     border-radius: 20px;
     padding: 2rem;
+}
+
+.virtual-apprentice .card {
+    color: var(--text-primary);
+    margin-top: 1rem;
 }
 
 /* Modals */
@@ -474,4 +505,24 @@ body {
 
 .fade-in {
     animation: slideIn 0.5s ease;
-}   
+}
+
+.user-info {
+    font-weight: 500;
+    color: var(--text-secondary);
+}
+
+/* Badges */
+.badge {
+    padding: 0.25rem 0.75rem;
+    border-radius: 50px;
+    color: white;
+    font-weight: 500;
+    display: inline-block;
+    font-size: 0.9rem;
+    text-transform: capitalize;
+}
+.badge.low { background: var(--success-color); }
+.badge.medium { background: var(--warning-color); }
+.badge.high { background: var(--danger-color); }
+.badge.critical { background: #991b1b; }
