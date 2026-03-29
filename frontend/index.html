@@ -3,123 +3,58 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>RAI Ops - AI Governance & Security</title>
+    <title>RAI Ops | Responsible AI Platform</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="styles.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
-    <header>
-        <nav class="navbar">
-            <div class="nav-brand">
-                <a href="#"><i class="fas fa-brain"></i> <span>RAI Ops</span></a>
-            </div>
-            <div class="nav-menu" id="navMenu">
-                <a href="#" class="nav-link active" data-action="navigate" data-page="dashboard">Dashboard</a>
-                <a href="#" class="nav-link" data-action="navigate" data-page="redteaming">Red Teaming</a>
-                <a href="#" class="nav-link" data-action="navigate" data-page="monitoring">Monitoring</a>
-                <a href="#" class="nav-link" data-action="navigate" data-page="knowledge">Knowledge</a>
-            </div>
-            <div class="nav-user" id="navUser">
-                <button class="btn-login" data-action="open-modal" data-modal-id="loginModal">Login</button>
-                <button class="btn-signup" data-action="open-modal" data-modal-id="signupModal">Sign Up</button>
-            </div>
-            <div class="mobile-menu-btn" data-action="toggle-mobile-menu">
-                <i class="fas fa-bars"></i>
-            </div>
-        </nav>
-    </header>
-
-    <main id="mainContent">
-        <!-- Dynamic content will be loaded here -->
-    </main>
-
-    <footer class="page-footer">
-        <p>&copy; <span id="copyright-year"></span> RAI Ops. All Rights Reserved.</p>
-    </footer>
-
-    <!-- Login Modal -->
-    <div id="loginModal" class="modal">
-        <div class="modal-content">
-            <span class="close" data-action="close-modal">&times;</span>
-            <h2>Login</h2>
-            <form id="loginForm">
-                <div class="form-group">
-                    <label for="username">Username</label>
-                    <input type="text" id="username" required>
-                </div>
-                <div class="form-group">
-                    <label for="password">Password</label>
-                    <input type="password" id="password" required>
-                </div>
-                <button type="submit" class="btn-primary">Login</button>
-                <p class="login-forgot-link-container"><a href="#" data-action="open-modal" data-modal-id="forgotPasswordModal" class="forgot-password-link">Forgot Password?</a></p>
-            </form>
+    <nav class="navbar">
+        <div class="nav-brand">
+            <i class="fas fa-shield-virus"></i> RAI Ops
         </div>
-    </div>
-
-    <!-- Signup Modal -->
-    <div id="signupModal" class="modal">
-        <div class="modal-content">
-            <span class="close" data-action="close-modal">&times;</span>
-            <h2>Sign Up</h2>
-            <form id="signupForm">
-                <div class="form-group">
-                    <label for="signupUsername">Username</label>
-                    <input type="text" id="signupUsername" required>
-                </div>
-                <div class="form-group">
-                    <label for="signupEmail">Email</label>
-                    <input type="email" id="signupEmail" required>
-                </div>
-                 <div class="form-group">
-                    <label for="signupCompany">Company</label>
-                    <input type="text" id="signupCompany">
-                </div>
-                <div class="form-group">
-                    <label for="signupPassword">Password</label>
-                    <input type="password" id="signupPassword" required>
-                </div>
-                <button type="submit" class="btn-primary">Sign Up</button>
-            </form>
+        <div class="nav-toggle" data-action="toggle-mobile-menu">
+            <i class="fas fa-bars"></i>
         </div>
-    </div>
-
-    <!-- Forgot Password Modal -->
-    <div id="forgotPasswordModal" class="modal">
-        <div class="modal-content">
-            <span class="close" data-action="close-modal">&times;</span>
-            <h2>Reset Password</h2>
-            <p class="modal-description">Enter your email to receive a reset link.</p>
-            <form id="forgotPasswordForm">
-                <div class="form-group">
-                    <label for="forgotEmail">Email Address</label>
-                    <input type="email" id="forgotEmail" required>
-                </div>
-                <button type="submit" class="btn-primary">Send Reset Link</button>
-            </form>
+        <ul class="nav-menu" id="navMenu">
+            <li class="nav-item">
+                <a href="#" class="nav-link active" data-action="navigate" data-page="dashboard">
+                    <i class="fas fa-chart-line"></i> Dashboard
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="#" class="nav-link" data-action="navigate" data-page="redteaming">
+                    <i class="fas fa-bug"></i> Red Teaming
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="#" class="nav-link" data-action="navigate" data-page="monitoring">
+                    <i class="fas fa-search-dollar"></i> Monitoring
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="#" class="nav-link" data-action="navigate" data-page="knowledge">
+                    <i class="fas fa-brain"></i> Knowledge
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="#" class="nav-link" data-action="navigate" data-page="reports">
+                    <i class="fas fa-file-alt"></i> Reports
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="#" class="nav-link" data-action="navigate" data-page="profile">
+                    <i class="fas fa-user-circle"></i> Profile
+                </a>
+            </li>
+        </ul>
+        <div class="theme-toggle" data-action="toggle-theme" title="Toggle Theme">
+            <i class="fas fa-adjust"></i>
         </div>
-    </div>
+    </nav>
 
-    <!-- Reset Password Modal (Simulated Page) -->
-    <div id="resetPasswordModal" class="modal">
-        <div class="modal-content">
-            <span class="close" data-action="close-modal">&times;</span>
-            <h2>Set New Password</h2>
-            <form id="resetPasswordForm">
-                <input type="hidden" id="resetToken">
-                <div class="form-group">
-                    <label for="newResetPassword">New Password</label>
-                    <input type="password" id="newResetPassword" required>
-                </div>
-                <button type="submit" class="btn-primary">Change Password</button>
-            </form>
-        </div>
-    </div>
+    <main id="mainContent" class="main-content"></main>
 
-    <!-- Back to top button -->
-    <a href="#" class="back-to-top" data-action="back-to-top" title="Go to top"><i class="fas fa-arrow-up"></i></a>
-
-    <script src="script.js"></script>
+    <script type="module" src="script.js"></script>
 </body>
 </html>

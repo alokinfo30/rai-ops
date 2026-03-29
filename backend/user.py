@@ -1,24 +1,34 @@
-from flask import Blueprint, jsonify
-from flask_jwt_extended import jwt_required, get_jwt_identity
-from models import db, User
-import sys
+from datetime import datetime
 
-user_bp = Blueprint('user', __name__, url_prefix='/api/user')
+from werkzeug.security import generate_password_hash, check_password_hash
 
-@user_bp.route('/me', methods=['DELETE'])
-@jwt_required()
-def delete_account():
-    try:
-        user_id = get_jwt_identity()
-        user = db.session.get(User, user_id)
-        
-        if not user:
-            return jsonify({'error': 'User not found'}), 404
-            
-        db.session.delete(user)
-        db.session.commit()
-        return jsonify({'message': 'Account deleted successfully'}), 200
-    except Exception as e:
-        print(f"Error deleting account: {e}", file=sys.stderr)
-        db.session.rollback()
-        return jsonify({'error': 'Failed to delete account'}), 500
+from backend.extensions import db
+
+
+class User(db.Model):
+    __tablename__ = "users"
+
+    id = db.Column(db.Integer, primary_key=True)
+    username = db.Column(db.String(80), unique=True, nullable=False)
+    email = db.Column(db.String(120), unique=True, nullable=False)
+    password_hash = db.Column(db.String(200), nullable=False)
+    company = db.Column(db.String(100))
+    role = db.Column(db.String(50), default="user")
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    is_active = db.Column(db.Boolean, default=True)
+
+    def set_password(self, password):
+        self.password_hash = generate_password_hash(password)
+
+    def check_password(self, password):
+        return check_password_hash(self.password_hash, password)
+
+    def to_dict(self):
+        return {
+            "id": self.id,
+            "username": self.username,
+            "email": self.email,
+            "company": self.company,
+            "role": self.role,
+            "created_at": self.created_at.isoformat(),
+        }

@@ -1,49 +1,53 @@
+import logging
 import smtplib
+import os
+from email.mime.application import MIMEApplication
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
-from email.mime.application import MIMEApplication
-import os
-import logging
+from typing import Optional
 
-# Configure logger
-logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
-def send_email(to_email, subject, body, html_body=None, attachment_bytes=None, attachment_name=None):
-    """Sends an email using SMTP configuration from environment variables."""
-    smtp_server = os.getenv('MAIL_SERVER', 'smtp.gmail.com')
-    smtp_port = int(os.getenv('MAIL_PORT', 587))
-    smtp_user = os.getenv('MAIL_USERNAME')
-    smtp_password = os.getenv('MAIL_PASSWORD')
-    
-    if not smtp_user or not smtp_password:
-        logger.warning("Email credentials (MAIL_USERNAME, MAIL_PASSWORD) not set. Skipping email send.")
-        return False
 
-    msg = MIMEMultipart('mixed')
-    msg['From'] = smtp_user
-    msg['To'] = to_email
-    msg['Subject'] = subject
+def send_email(to_email: str, subject: str, body: str, html_body: Optional[str] = None, attachment_bytes: Optional[bytes] = None, attachment_name: Optional[str] = None) -> None:
+    """
+    Sends an email using SMTP settings from environment variables.
+    Falls back to logging if SMTP_SERVER is not set.
+    """
+    smtp_server = os.environ.get("SMTP_SERVER")
+    smtp_port = int(os.environ.get("SMTP_PORT", 587))
+    sender_email = os.environ.get("SMTP_USERNAME", "noreply@rai-ops.local")
+    sender_password = os.environ.get("SMTP_PASSWORD")
 
-    # Create the body part (alternative allows client to choose text or html)
-    msg_body = MIMEMultipart('alternative')
-    msg_body.attach(MIMEText(body, 'plain'))
+    # Mock email in development if no server configured
+    if not smtp_server:
+        logger.info("--- MOCK EMAIL START ---")
+        logger.info(f"To: {to_email}")
+        logger.info(f"Subject: {subject}")
+        if attachment_name:
+             logger.info(f"Attachment: {attachment_name} ({len(attachment_bytes) if attachment_bytes else 0} bytes)")
+        logger.info("--- MOCK EMAIL END ---")
+        return
+
+    msg = MIMEMultipart()
+    msg["From"] = sender_email
+    msg["To"] = to_email
+    msg["Subject"] = subject
+
+    msg.attach(MIMEText(body, "plain"))
     if html_body:
-        msg_body.attach(MIMEText(html_body, 'html'))
-    msg.attach(msg_body)
+        msg.attach(MIMEText(html_body, "html"))
 
     if attachment_bytes and attachment_name:
         part = MIMEApplication(attachment_bytes, Name=attachment_name)
-        part['Content-Disposition'] = f'attachment; filename="{attachment_name}"'
+        part["Content-Disposition"] = f'attachment; filename="{attachment_name}"'
         msg.attach(part)
 
     try:
-        server = smtplib.SMTP(smtp_server, smtp_port)
-        server.starttls()
-        server.login(smtp_user, smtp_password)
-        server.send_message(msg)
-        server.quit()
+        with smtplib.SMTP(smtp_server, smtp_port) as server:
+            server.starttls()
+            if sender_password:
+                server.login(sender_email, sender_password)
+            server.send_message(msg)
         logger.info(f"Email sent successfully to {to_email}")
-        return True
     except Exception as e:
-        logger.error(f"Failed to send email to {to_email}: {e}", exc_info=True)
-        return False
+        logger.error(f"Failed to send email: {e}")

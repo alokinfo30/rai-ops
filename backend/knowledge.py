@@ -1,38 +1,26 @@
-from flask import Blueprint, request, jsonify
-from flask_jwt_extended import jwt_required, get_jwt_identity
-from models import db, ExpertSession
-from services import generate_expert_knowledge_graph, generate_virtual_apprentice_data
+from datetime import datetime
 
-knowledge_bp = Blueprint('knowledge', __name__, url_prefix='/api/knowledge')
+from backend.extensions import db
 
-@knowledge_bp.route('/expert/session', methods=['POST'])
-@jwt_required()
-def create_expert_session():
-    user_id = get_jwt_identity()
-    data = request.json
-    knowledge_graph = generate_expert_knowledge_graph(data.get('expert_name', 'Unknown'), data.get('domain', 'General'))
-    
-    session = ExpertSession(
-        user_id=user_id,
-        expert_name=data.get('expert_name', 'Unknown'),
-        domain=data.get('domain', 'General'),
-        knowledge_graph=knowledge_graph
-    )
-    db.session.add(session)
-    db.session.commit()
-    
-    return jsonify({
-        'message': 'Expert session created',
-        'session': session.to_dict()
-    }), 201
 
-@knowledge_bp.route('/virtual-apprentice/<int:session_id>', methods=['GET'])
-@jwt_required()
-def get_virtual_apprentice(session_id):
-    session = ExpertSession.query.get(session_id)
-    
-    if not session:
-        return jsonify({'error': 'Expert session not found'}), 404
-        
-    apprentice = generate_virtual_apprentice_data(session)
-    return jsonify(apprentice)
+class ExpertSession(db.Model):
+    __tablename__ = "expert_sessions"
+
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)
+    expert_name = db.Column(db.String(200))
+    domain = db.Column(db.String(200))
+    experience = db.Column(db.Integer)
+    knowledge_graph = db.Column(db.JSON)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+    def to_dict(self):
+        return {
+            "id": self.id,
+            "user_id": self.user_id,
+            "expert_name": self.expert_name,
+            "domain": self.domain,
+            "experience": self.experience,
+            "knowledge_graph": self.knowledge_graph,
+            "created_at": self.created_at.isoformat(),
+        }

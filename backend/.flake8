@@ -1,0 +1,13 @@
+[flake8]
+# It's a good practice to ignore some warnings that are not critical or conflict with formatters like black.
+# E203: whitespace before ':' (black compatibility)
+# W503: line break before binary operator (black compatibility)
+ignore = E203, W503
+# Set max line length to be compatible with the black code formatter
+max-line-length = 88
+# Exclude common directories from linting
+exclude =
+    .git,
+    __pycache__,
+    build,
+    dist

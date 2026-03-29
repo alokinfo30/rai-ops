@@ -1,200 +1,272 @@
-# rai-ops (AI Governance & Security Platform)
-An open source platform for responsible AI operations, providing automated red teaming, continuous control monitoring, and institutional knowledge transfer to ensure AI governance, security, and compliance across the development lifecycle.
-A complete "Responsible AI Operations" platform that addresses the AI governance gap with red teaming, continuous monitoring, and knowledge transfer – all using free technologies and responsive design.
+# RAI Ops Application
 
-An end-to-end platform for Responsible AI Operations, providing tools for AI governance, security testing, and knowledge transfer.
-
-This complete solution provides a fully functional AI Governance Platform with:
-
-✅ Responsive design for all devices
-
-✅ Complete authentication system
-
-✅ Red teaming simulation
-
-✅ Continuous monitoring
-
-✅ Knowledge transfer
-
-✅ Production-ready configuration
-
-✅ Docker containerization
-
-✅ SSL/TLS support
-
-✅ Scalable architecture
-
-The platform is completely free, open-source, and ready for deployment to production following the step-by-step instructions provided.
+A comprehensive Risk Assessment and Intelligence Operations platform for AI systems.
 
 ## Features
 
-### 1. Red Teaming as a Service
-- Deepfake detection testing
-- Adversarial prompt injection attacks
-- Synthetic identity fraud simulation
-- Automated security vulnerability assessment
+- **User Authentication**: Secure JWT-based authentication with email verification
+- **AI Risk Assessment**: Comprehensive risk evaluation and monitoring
+- **Red Teaming**: Security testing and vulnerability assessment
+- **Knowledge Management**: AI model documentation and compliance tracking
+- **Real-time Monitoring**: Continuous system health and performance monitoring
+- **Reporting**: Detailed compliance and security reports
+- **Notifications**: Email alerts and system notifications
 
-### 2. Continuous Control Monitoring
-- Real-time model drift detection
-- Compliance logging and audit trails
-- Security alerting system
-- Policy-as-code enforcement
-
-### 3. Institutional Knowledge Transfer
-- Expert session recording
-- Virtual apprentice creation
-- Interactive decision simulations
-- Knowledge graph generation
-
-## Tech Stack
-
-- **Backend**: Flask (Python)
-- **Frontend**: HTML5, CSS3, JavaScript
-- **Database**: PostgreSQL
-- **Cache**: Redis
-- **Proxy**: Nginx
-- **Container**: Docker & Docker Compose
-
-## Installation
+## Environment Setup
 
 ### Prerequisites
-- Docker and Docker Compose
-- Git
-- Python 3.11+ (for local development)
-- Node.js 16+ (optional for frontend development)
 
-### Quick Start
+- Python 3.10+
+- Node.js 18+
+- PostgreSQL (for production)
+- Redis (for caching and rate limiting)
 
-1. Clone the repository:
+### Development Environment
+
+1. **Clone the repository:**
+   ```bash
+   git clone <repository-url>
+   cd rai-ops
+   ```
+
+2. **Set up environment variables:**
+   ```bash
+   cp .env.example .env
+   # Edit .env with your configuration
+   ```
+
+3. **Start development environment:**
+   ```bash
+   python start_dev.py
+   ```
+   
+   This will:
+   - Install Python and Node.js dependencies
+   - Start the backend Flask server on http://localhost:5000
+   - Start the frontend Vite server on http://localhost:5173
+   - Set up development-specific configurations
+
+4. **Access the application:**
+   - Frontend: http://localhost:5173
+   - Backend API: http://localhost:5000
+   - API Documentation: http://localhost:5000/health
+
+### Production Environment
+
+1. **Set up environment variables:**
+   ```bash
+   cp .env.example .env.production
+   # Edit .env.production with production values
+   ```
+
+2. **Using Docker (Recommended):**
+   ```bash
+   # Build and start all services
+   docker-compose up -d
+   
+   # View logs
+   docker-compose logs -f
+   
+   # Stop services
+   docker-compose down
+   ```
+
+3. **Manual deployment:**
+   ```bash
+   # Install dependencies
+   python -m pip install -r backend/requirements.txt
+   
+   # Set environment variables
+   export FLASK_ENV=production
+   export DATABASE_URL=postgresql://user:password@localhost/rai_ops_prod
+   
+   # Run migrations
+   python backend/migrations.py
+   
+   # Start production server
+   python start_prod.py
+   ```
+
+## Configuration
+
+### Environment Variables
+
+| Variable | Description | Default | Required |
+|----------|-------------|---------|----------|
+| `SECRET_KEY` | Flask secret key | dev-secret-key | Yes (Prod) |
+| `JWT_SECRET_KEY` | JWT signing key | dev-jwt-secret | Yes (Prod) |
+| `DATABASE_URL` | Database connection string | sqlite:///rai_ops.db | No |
+| `MAIL_USERNAME` | SMTP username | - | Yes (Prod) |
+| `MAIL_PASSWORD` | SMTP password | - | Yes (Prod) |
+| `OPENAI_API_KEY` | OpenAI API key | - | Yes |
+| `REDIS_URL` | Redis connection string | redis://localhost:6379/0 | No |
+
+### Development vs Production
+
+#### Development Configuration
+- SQLite database
+- Debug mode enabled
+- Relaxed CORS settings
+- In-memory rate limiting
+- Debug logging
+- Email suppression
+
+#### Production Configuration
+- PostgreSQL database (required)
+- Debug mode disabled
+- Strict CORS settings
+- Redis-based rate limiting
+- Info-level logging
+- Full email functionality
+
+## Docker Setup
+
+### Development with Docker
+
 ```bash
-git clone https://github.com/yourusername/ai-governance-platform.git
-cd ai-governance-platform
+# Start development environment
+docker-compose -f docker-compose.dev.yml up -d
 
-Activating the Virtual Environment
-The source command is for Linux/Git Bash. In a Windows Command Prompt, you call the script directly.
+# View logs
+docker-compose -f docker-compose.dev.yml logs -f
+```
 
-The Fix:
+### Production with Docker
 
-DOS
-venv\Scripts\activate
-Once activated, your prompt should start with (venv).
+```bash
+# Start production environment
+docker-compose up -d
 
-Generating Secret Keys (Python Syntax)
-When you are inside the Python interpreter (the >>> prompt), you have to run commands one line at a time. You don't type the word "python" again.
+# Monitor services
+docker-compose ps
 
-The Fix:
+# View logs
+docker-compose logs -f
+```
 
-Type python to enter the shell.
+## API Endpoints
 
-Run these three separate lines:
+### Authentication
+- `POST /api/auth/register` - User registration
+- `POST /api/auth/login` - User login
+- `POST /api/auth/refresh` - Token refresh
+- `POST /api/auth/forgot-password` - Password reset request
+- `POST /api/auth/reset-password` - Password reset
 
-Python
-import secrets
-print(secrets.token_hex(32))
-exit()
-Copy that long string for your .env file
+### User Management
+- `PUT /api/auth/profile` - Update profile
 
-Build and run with Docker:
+### System Health
+- `GET /health` - Health check
 
-bash
-docker-compose up --build
-Access the application:
+## Frontend Development
 
-Web UI: http://localhost
+The frontend is built with React and Vite. To develop the frontend separately:
 
-API: http://localhost/api
-
-Health check: http://localhost/health
-
-Local Development
-Set up Python virtual environment:
-
-bash
-python -m venv venv
-source venv/bin/activate  # On Windows: venv\Scripts\activate
-pip install -r backend/requirements.txt
-Set up database:
-
-bash
-docker-compose up postgres redis
-Run backend:
-
-bash
+```bash
 cd backend
-python app.py
-Serve frontend:
+npm install
+npm run dev
+```
 
-bash
-# Using Python HTTP server
-cd frontend
-python -m http.server 8000
+### Environment Variables for Frontend
 
+Create a `.env` file in the `backend` directory:
 
-**Security Considerations**
-Environment Variables: Never commit .env file
+```env
+VITE_API_URL=http://localhost:5000
+VITE_ENVIRONMENT=development
+```
 
-Database: Use strong passwords in production
+## Security Features
 
-SSL: Always use valid SSL certificates
+- JWT-based authentication
+- Rate limiting on authentication endpoints
+- CSRF protection (disabled in development)
+- Secure session cookies (production only)
+- Input validation and sanitization
+- HTTPS enforcement (production)
 
-API Keys: Rotate regularly
+## Monitoring and Logging
 
-Rate Limiting: Implement for production use
+### Development
+- Console logging with debug level
+- File logging to `logs/dev_server.log`
 
-Backups: Regular database backups
+### Production
+- Structured logging to `logs/prod_server.log`
+- Gunicorn access and error logs
+- Health check endpoints
+- Docker health checks
 
-Monitoring
-Health check endpoint: /health
+## Troubleshooting
 
-Metrics endpoint: /metrics (if enabled)
+### Common Issues
 
-Logs: Docker logs or centralized logging
+1. **Port conflicts:**
+   - Backend default: 5000
+   - Frontend default: 5173
+   - Change ports in configuration if needed
 
-Troubleshooting
-Common Issues
-Database connection errors:
+2. **Database issues:**
+   - Ensure PostgreSQL is running (production)
+   - Check database permissions
+   - Run migrations: `python backend/migrations.py`
 
-Check if PostgreSQL is running: docker-compose ps
+3. **Dependency issues:**
+   - Clear Python cache: `pip cache purge`
+   - Clear Node.js cache: `npm cache clean --force`
+   - Reinstall dependencies
 
-Verify connection string in .env
+4. **Environment variables:**
+   - Check `.env` file syntax
+   - Ensure required variables are set
+   - Restart services after changes
 
-Port conflicts:
+### Logs
 
-Change ports in docker-compose.yml
+- Development: `logs/dev_server.log`
+- Production: `logs/prod_server.log`
+- Docker: `docker-compose logs`
 
-Check running services: netstat -tulpn
+## Deployment
 
-Permission denied for uploads:
+### Production Deployment Checklist
 
-bash
-chmod 777 backend/uploads
-Contributing
-Fork the repository
+- [ ] Set strong `SECRET_KEY` and `JWT_SECRET_KEY`
+- [ ] Configure PostgreSQL database
+- [ ] Set up Redis instance
+- [ ] Configure SMTP for email
+- [ ] Set up SSL/TLS certificates
+- [ ] Configure firewall and security groups
+- [ ] Set up monitoring and alerting
+- [ ] Configure backups
+- [ ] Test disaster recovery
 
-Create feature branch
+### Scaling
 
-Commit changes
+- Use multiple Gunicorn workers
+- Implement database connection pooling
+- Add Redis clustering for high availability
+- Use load balancers for multiple instances
+- Implement CDN for static assets
 
-Roadmap
-Add more AI attack simulations
+## Contributing
 
-Implement real-time monitoring dashboard
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes
+4. Add tests
+5. Update documentation
+6. Submit a pull request
 
-Add support for more ML frameworks
+## License
 
-Create mobile app
+[Add your license information here]
 
-Add compliance reporting
+## Support
 
-Implement advanced analytics
-
-Acknowledgments
-OpenAI for API access
-
-Flask community
-
-Docker community
-
-Push to branch
-
-Create Pull Request
+For support and questions:
+- Create an issue in the repository
+- Contact the development team
+- Check the documentation

@@ -1,16 +1,22 @@
-from flask import Blueprint, jsonify
-from models import db
-from datetime import datetime
-import sys
+from flask import Blueprint, jsonify, Response
+from sqlalchemy import text
+from .extensions import db
 
-health_bp = Blueprint('health', __name__)
+health_bp = Blueprint("health", __name__, url_prefix="/health")
 
-@health_bp.route('/health')
-def health_check():
+@health_bp.route("", methods=["GET"])
+def health_check() -> tuple[Response, int]:
+    """
+    Health check endpoint for container orchestration probes.
+    """
+    health_status = {"status": "ok", "database": "unknown"}
+    
     try:
-        db.session.execute(db.text('SELECT 1'))
-        db_status = 'connected'
+        db.session.execute(text("SELECT 1"))
+        health_status["database"] = "connected"
     except Exception as e:
-        print(f"Health check DB error: {e}", file=sys.stderr)
-        db_status = f'error: {str(e)}'
-    return jsonify({'status': 'healthy', 'database': db_status, 'timestamp': datetime.utcnow().isoformat()}), 200
+        health_status["status"] = "degraded"
+        health_status["database"] = str(e)
+        return jsonify(health_status), 503
+
+    return jsonify(health_status), 200

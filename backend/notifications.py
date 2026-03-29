@@ -1,44 +1,39 @@
-from flask import Blueprint, request, jsonify
-from flask_jwt_extended import jwt_required, get_jwt_identity
-from models import db, Notification
-from datetime import datetime
-import sys
+from flask import Blueprint, jsonify, Response
+from flask_jwt_extended import get_jwt_identity, jwt_required
 
-notifications_bp = Blueprint('notifications', __name__, url_prefix='/api/notifications')
+from .extensions import db
+from .models import Notification
 
-@notifications_bp.route('', methods=['GET'])
+notifications_bp = Blueprint(
+    "notifications", __name__, url_prefix="/api/notifications"
+)
+
+@notifications_bp.route("", methods=["GET"])
 @jwt_required()
-def get_notifications():
+def get_notifications() -> Response:
+    """
+    Fetch recent user notifications.
+    """
     user_id = get_jwt_identity()
-    notifications = Notification.query.filter_by(user_id=user_id).order_by(Notification.timestamp.desc()).limit(20).all()
-    return jsonify([notification.to_dict() for notification in notifications])
+    notifications = (
+        Notification.query.filter_by(user_id=user_id)
+        .order_by(Notification.timestamp.desc())
+        .limit(50)
+        .all()
+    )
+    return jsonify([n.to_dict() for n in notifications])
 
-@notifications_bp.route('/<int:notification_id>', methods=['PUT'])
+@notifications_bp.route("/<int:notif_id>/read", methods=["POST"])
 @jwt_required()
-def mark_notification_as_read(notification_id):
+def mark_read(notif_id: int) -> tuple[Response, int]:
     user_id = get_jwt_identity()
-    notification = Notification.query.filter_by(id=notification_id, user_id=user_id).first()
+    notification = Notification.query.filter_by(
+        id=notif_id, user_id=user_id
+    ).first()
 
     if not notification:
-        return jsonify({'error': 'Notification not found'}), 404
+        return jsonify({"error": "Notification not found"}), 404
 
     notification.is_read = True
     db.session.commit()
-
-    return jsonify({'message': 'Notification marked as read', 'notification': notification.to_dict()})
-
-@notifications_bp.route('/unread_count', methods=['GET'])
-@jwt_required()
-def get_unread_notifications_count():
-    user_id = get_jwt_identity()
-    unread_count = Notification.query.filter_by(user_id=user_id, is_read=False).count()
-    return jsonify({'unread_count': unread_count})
-
-def create_notification(user_id, message):
-    notification = Notification(
-        user_id=user_id,
-        message=message
-    )
-    db.session.add(notification)
-    db.session.commit()
-    return notification
+    return jsonify({"message": "Marked as read"}), 200

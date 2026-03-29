@@ -1,5 +1,5 @@
-from app import create_app
-import os
+from backend import create_app
+from backend.startup import on_startup
 
-# The app instance is created by calling create_app()
 app = create_app()
+on_startup(app)
