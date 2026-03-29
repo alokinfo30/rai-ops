@@ -132,6 +132,68 @@ docker-compose -f docker-compose.dev.yml logs -f
 ```
 
 ### Production with Docker
+Activating the Virtual Environment
+The source command is for Linux/Git Bash. In a Windows Command Prompt, you call the script directly.
+
+The Fix:
+
+DOS
+venv\Scripts\activate
+Once activated, your prompt should start with (venv).
+
+Generating Secret Keys (Python Syntax)
+When you are inside the Python interpreter (the >>> prompt), you have to run commands one line at a time. You don't type the word "python" again.
+
+The Fix:
+
+Type python to enter the shell.
+
+Run these three separate lines:
+
+Python
+import secrets
+print(secrets.token_hex(32))
+exit()
+Copy that long string for your .env file
+
+Build and run with Docker:
+
+bash
+docker-compose up --build
+Access the application:
+
+Web UI: http://localhost
+
+API: http://localhost/api
+
+Health check: http://localhost/health
+
+Local Development
+Set up Python virtual environment:
+
+bash
+python -m venv venv
+source venv/bin/activate  # On Windows: venv\Scripts\activate
+pip install -r backend/requirements.txt
+Set up database:
+
+bash
+docker-compose up postgres redis
+Run backend:
+
+bash
+cd backend
+python app.py
+Serve frontend:
+
+bash
+# Using Python HTTP server
+cd frontend
+python -m http.server 8000
+
+
+**Security Considerations**
+Environment Variables: Never commit .env file
 
 ```bash
 # Start production environment
@@ -270,3 +332,47 @@ For support and questions:
 - Create an issue in the repository
 - Contact the development team
 - Check the documentation
+Check if PostgreSQL is running: docker-compose ps
+
+Verify connection string in .env
+
+Port conflicts:
+
+Change ports in docker-compose.yml
+
+Check running services: netstat -tulpn
+
+Permission denied for uploads:
+
+bash
+chmod 777 backend/uploads
+Contributing
+Fork the repository
+
+Create feature branch
+
+Commit changes
+
+Roadmap
+Add more AI attack simulations
+
+Implement real-time monitoring dashboard
+
+Add support for more ML frameworks
+
+Create mobile app
+
+Add compliance reporting
+
+Implement advanced analytics
+
+Acknowledgments
+OpenAI for API access
+
+Flask community
+
+Docker community
+
+Push to branch
+
+Create Pull Request
