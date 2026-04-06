@@ -15,12 +15,10 @@ class Config:
     uri = os.environ.get('DATABASE_URL')
     
     if uri:
-        print("Config: Using DATABASE_URL from environment.", file=sys.stderr)
         if uri.startswith("postgres://"):
             uri = uri.replace("postgres://", "postgresql://", 1)
         SQLALCHEMY_DATABASE_URI = uri
     else:
-        print("Config: DATABASE_URL not found. Using local fallback.", file=sys.stderr)
         db_user = os.environ.get('POSTGRES_USER', 'user')
         db_password = os.environ.get('POSTGRES_PASSWORD', 'password')
         db_host = os.environ.get('DATABASE_HOST', 'localhost')
@@ -34,6 +32,9 @@ class Config:
     SECRET_KEY = os.getenv('SECRET_KEY', 'dev-secret-key-change-in-production')
     JWT_SECRET_KEY = os.getenv('JWT_SECRET_KEY', 'jwt-secret-key-change-in-production')
     JWT_ACCESS_TOKEN_EXPIRES = timedelta(hours=1)
+    
+    # Rate Limiting
+    RATELIMIT_STORAGE_URI = os.getenv('REDIS_URL', 'memory://')
     REDIS_URL = os.getenv('REDIS_URL', 'redis://localhost:6379')
     
     # OpenAI
@@ -46,3 +47,6 @@ class Config:
     # Environment
     DEBUG = os.getenv('FLASK_DEBUG', 'False').lower() == 'true'
     TESTING = False
+
+    # Frontend
+    FRONTEND_URL = os.environ.get('FRONTEND_URL', 'http://localhost:8000')

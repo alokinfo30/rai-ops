@@ -1,4 +1,42 @@
 ﻿node_modules/
+
+# Environments and Secrets
 .env
+.env.*
+!.env.example
+
+# Logs and Caches
 *.log
 __pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+.eslintcache
+
+# Environments and Virtual Envs
+venv/
+env/
+ENV/
+instance/
+.webassets-cache
+.flaskenv
+
+# IDEs and OS
+.vscode/
+.idea/
+.DS_Store
+
+# Infrastructure as Code & Cloud CLI
+.terraform/
+*.tfstate*
+.aws/
+.azure/
+.gcloud/
+
+# Build and Data
+dist/
+build/
+uploads/
+*.db
+*.sqlite3
